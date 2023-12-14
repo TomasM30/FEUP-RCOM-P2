@@ -13,9 +13,6 @@
 
 #include <netdb.h>
 
-#define SERVER_PORT 6000
-#define SERVER_ADDR "192.168.28.96"
-
 #define MAX_SIZE 1024
 
 #define SERVER 21
@@ -29,15 +26,22 @@ typedef struct {
     char url_path[1024];
 } url;
 
+// This function converts a string to a url struct
+url convertToURL(const char* urlStr);
 
-/*
-struct hostent {
-    char *h_name;    // Official name of the host.
-    char **h_aliases;    // A NULL-terminated array of alternate names for the host.
-    int h_addrtype;    // The type of address being returned; usually AF_INET.
-    int h_length;    // The length of the address in bytes.
-    char **h_addr_list;    // A zero-terminated array of network addresses for the host.
-    // Host addresses are in Network Byte Order.
-};*/
+// This function connects to the server
+int connectSocket(char *ip_addr, int port);
+
+// This function activates passive mode
+int pasv(int sockfd);
+
+// This function logs into the server
+int login(url* urlObj, int sockfd);
+
+// This function retrieves the response from the server
+char * getReply(int sockfd);
+
+// This function downloads the file from the server
+int retrieveResource(int sockfd, int sockfd2, const char* url_path);
 
 #endif // DOWNLOAD_H

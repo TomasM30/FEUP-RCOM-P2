@@ -61,9 +61,6 @@ url convertToURL(const char* urlStr) {
     return urlObj;
 }
 
-
-
-
 int connectSocket(char *ip_addr, int port) {
     int sockfd;
     struct sockaddr_in server_addr;
@@ -91,7 +88,7 @@ int connectSocket(char *ip_addr, int port) {
 }
 
 char * getReply(int sockfd){
-    char *reply = malloc(1024);
+    char *reply = malloc(MAX_SIZE);
 	
 	size_t n = 0;
 	ssize_t read;
@@ -108,9 +105,8 @@ char * getReply(int sockfd){
 
 }
 
-
 int login(url* urlObj, int sockfd) {
-    char login[1024];
+    char login[MAX_SIZE];
 
     sprintf(login, "user %s\n", urlObj->user);
     write(sockfd, login, strlen(login));
@@ -136,7 +132,7 @@ int login(url* urlObj, int sockfd) {
 }
 
 int pasv(int sockfd) {
-    char *pasv = malloc(1024);
+    char *pasv = malloc(MAX_SIZE);
     sprintf(pasv, "pasv\n");
     write(sockfd, pasv, strlen(pasv));
 
@@ -147,7 +143,6 @@ int pasv(int sockfd) {
         return -1;
     }
 
-    char *ip = malloc(1024);
     int port[2];
 
     sscanf(reply, "227 Entering Passive Mode (%*[^,],%*d,%*d,%*d,%d,%d)", &port[0], &port[1]);
@@ -163,7 +158,7 @@ int pasv(int sockfd) {
 }
 
 int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
-    char request[1024];
+    char request[MAX_SIZE];
     sprintf(request, "retr %s\n", url_path);
 
     write(sockfd, request, strlen(request));
@@ -187,14 +182,11 @@ int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
         return -1;
     }
 
-    char buf[1024];
-    ssize_t bytesRead;
-
-    long int cont;
+    char buf[MAX_SIZE];
 
     int bytes;
 
-    while ((bytes = recv(sockfd2, buf, 1024, 0)) > 0) {
+    while ((bytes = recv(sockfd2, buf, MAX_SIZE, 0)) > 0) {
         if (f == NULL) {
             fprintf(stderr, "Error: File pointer is NULL.\n");
             break; 
@@ -206,8 +198,6 @@ int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
             fprintf(stderr, "Error writing to the file.\n");
             break;  
         }
-        cont+=bytes;
-        printf("Bytes written: %ld\n", cont);
     }
 
     fclose(f);
@@ -215,17 +205,14 @@ int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
     return 0;
 }
 
-
-
-
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc != 2) {
         fprintf(stderr, "Invalid number of arguments. The format should be: download ftp://[<user>:<password>@]<host>/<url-path>\n");
         exit(-1);
     }
 
     // check if url is valid and convert to url object
-    url urlObj = convertToURL(argv[2]);
+    url urlObj = convertToURL(argv[1]);
     if (strlen(urlObj.host) == 0) {
         fprintf(stderr, "Invalid URL\n");
         exit(-1);
@@ -287,9 +274,11 @@ int main(int argc, char *argv[]) {
     printf("Passive mode established\n");
 
 
-    // request resource
+    // request resource and download it
 
     int sockfd2 = connectSocket(ip_addr, passive_port);
+
+
 
     int command = retrieveResource(sockfd, sockfd2, urlObj.url_path);
 

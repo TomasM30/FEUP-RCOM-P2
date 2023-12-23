@@ -7,7 +7,7 @@ url convertToURL(const char* urlStr) {
     // Check if the URL starts with "ftp://"
     const char* ftpProtocol = "ftp://";
     if (strncmp(urlStr, ftpProtocol, strlen(ftpProtocol)) != 0) {
-        fprintf(stderr, "Invalid URL format. The URL should start with 'ftp://'.\n");
+        fprintf(stderr, "Invalid URL format. The URL should start with 'ftp://'.\n\n");
         return urlObj;
     }
 
@@ -99,7 +99,7 @@ char * getReply(int sockfd){
 	}
 
 	reply[1023] = '\0';
-	printf("Reply: %s\n", reply);
+	printf("Reply: %s\n\n", reply);
 
 	return reply;
 
@@ -108,7 +108,7 @@ char * getReply(int sockfd){
 int login(url* urlObj, int sockfd) {
     char login[MAX_SIZE];
 
-    sprintf(login, "user %s\n", urlObj->user);
+    sprintf(login, "user %s\n\n", urlObj->user);
     write(sockfd, login, strlen(login));
 
     char* reply = getReply(sockfd);
@@ -118,7 +118,7 @@ int login(url* urlObj, int sockfd) {
         return -1;
     }
 
-    sprintf(login, "pass %s\n", urlObj->password);
+    sprintf(login, "pass %s\n\n", urlObj->password);
     write(sockfd, login, strlen(login));
 
     reply = getReply(sockfd);
@@ -133,7 +133,7 @@ int login(url* urlObj, int sockfd) {
 
 int pasv(int sockfd) {
     char *pasv = malloc(MAX_SIZE);
-    sprintf(pasv, "pasv\n");
+    sprintf(pasv, "pasv\n\n");
     write(sockfd, pasv, strlen(pasv));
 
     char *reply = getReply(sockfd);
@@ -149,17 +149,17 @@ int pasv(int sockfd) {
 
     int port_pasv = port[0] * 256 + port[1];
 
-    printf("port[0] is %d\n", port[0]);
-    printf("port[1] is %d\n", port[1]);
+    printf("port[0] is %d\n\n", port[0]);
+    printf("port[1] is %d\n\n", port[1]);
 
-    printf("port: %d\n", port_pasv);
+    printf("port: %d\n\n", port_pasv);
 
     return port_pasv;
 }
 
 int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
     char request[MAX_SIZE];
-    sprintf(request, "retr %s\n", url_path);
+    sprintf(request, "retr %s\n\n", url_path);
 
     write(sockfd, request, strlen(request));
 
@@ -173,11 +173,11 @@ int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
     const char* lastSlash = strrchr(url_path, '/');
     const char* filename = (lastSlash != NULL) ? lastSlash + 1 : url_path;
 
-    printf("Filename: %s\n", filename);
+    printf("Filename: %s\n\n", filename);
 
 	FILE *f = fopen(filename, "wb");
     if (f == NULL) {
-        fprintf(stderr, "Error opening file for writing\n");
+        fprintf(stderr, "Error opening file for writing\n\n");
         close(sockfd);
         return -1;
     }
@@ -188,14 +188,14 @@ int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
 
     while ((bytes = recv(sockfd2, buf, MAX_SIZE, 0)) > 0) {
         if (f == NULL) {
-            fprintf(stderr, "Error: File pointer is NULL.\n");
+            fprintf(stderr, "Error: File pointer is NULL.\n\n");
             break; 
         }
 
         size_t bytes_written = fwrite(buf, 1, bytes, f);
 
         if (bytes_written != bytes) {
-            fprintf(stderr, "Error writing to the file.\n");
+            fprintf(stderr, "Error writing to the file.\n\n");
             break;  
         }
     }
@@ -207,14 +207,14 @@ int retrieveResource(int sockfd, int sockfd2, const char* url_path) {
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        fprintf(stderr, "Invalid number of arguments. The format should be: download ftp://[<user>:<password>@]<host>/<url-path>\n");
+        fprintf(stderr, "Invalid number of arguments. The format should be: download ftp://[<user>:<password>@]<host>/<url-path>\n\n");
         exit(-1);
     }
 
     // check if url is valid and convert to url object
     url urlObj = convertToURL(argv[1]);
     if (strlen(urlObj.host) == 0) {
-        fprintf(stderr, "Invalid URL\n");
+        fprintf(stderr, "Invalid URL\n\n");
         exit(-1);
     }
 
@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
     }
 
 
-    printf("Host: %s\n", urlObj.host);
-    printf("URL path: %s\n", urlObj.url_path);
+    printf("Host: %s\n\n", urlObj.host);
+    printf("URL path: %s\n\n", urlObj.url_path);
 
     // get ip address from host
     struct hostent *h;
@@ -237,8 +237,8 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    printf("Host name  : %s\n", h->h_name);
-    printf("IP Address : %s\n", inet_ntoa(*((struct in_addr *) h->h_addr)));
+    printf("Host name  : %s\n\n", h->h_name);
+    printf("IP Address : %s\n\n", inet_ntoa(*((struct in_addr *) h->h_addr)));
 
     char *ip_addr = inet_ntoa(*((struct in_addr *) h->h_addr));
 
@@ -246,7 +246,7 @@ int main(int argc, char *argv[]) {
 
     // connect to server A
     if (sockfd < 0) {
-        fprintf(stderr, "Error connecting to server\n");
+        fprintf(stderr, "Error connecting to server\n\n");
         exit(-1);
     }
 
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
 
     // login
     if (login(&urlObj, sockfd) < 0) {
-        fprintf(stderr, "Error logging in\n");
+        fprintf(stderr, "Error logging in\n\n");
         exit(-1);
     }
 
@@ -267,11 +267,11 @@ int main(int argc, char *argv[]) {
     int passive_port = pasv(sockfd);
 
     if (passive_port < 0) {
-        fprintf(stderr, "Error entering passive mode\n");
+        fprintf(stderr, "Error entering passive mode\n\n");
         exit(-1);
     }
 
-    printf("Passive mode established\n");
+    printf("Passive mode established\n\n");
 
 
     // request resource and download it
@@ -283,15 +283,17 @@ int main(int argc, char *argv[]) {
     int command = retrieveResource(sockfd, sockfd2, urlObj.url_path);
 
     if (command < 0){
-        fprintf(stderr, "Error requesting resource\n");
+        fprintf(stderr, "Error requesting resource\n\n");
         exit(-1);
     }
 
 
-    printf("Resource downloaded\n");
+    printf("Resource downloaded\n\n");
+
+    write(sockfd, "quit\n\n", strlen("quit\n\n"));
 
     if(close(sockfd)!=0 || close(sockfd2)!=0) {
-        printf("Error: Couldn't close sockets.\n");
+        printf("Error: Couldn't close sockets.\n\n");
         exit(-1);
     }
 

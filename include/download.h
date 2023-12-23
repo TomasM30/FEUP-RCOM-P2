@@ -19,6 +19,12 @@
 
 #define h_addr h_addr_list[0]
 
+/**
+ * @brief Structure representing a URL.
+ * 
+ * This structure holds the components of a URL, including the user, password, host, and URL path.
+ * Each component is represented by a character array with a maximum length of 1024 characters.
+ */
 typedef struct {
     char user[1024];
     char password[1024];
@@ -27,12 +33,12 @@ typedef struct {
 } url;
 
 /**
- * @brief Converts a C-style string representing a URL to a URL object.
+ * @brief Converts a string representing a URL to a URL object.
  *
- * This function takes a C-style string `urlStr` as input and converts it to a URL object.
+ * This function takes a string `urlStr` as input and converts it to a URL object.
  * The URL object represents the URL in a structured format, allowing easy manipulation and retrieval of its components.
  *
- * @param urlStr The C-style string representing the URL.
+ * @param urlStr The string representing the URL.
  * @return The URL object representing the converted URL.
  */
 url convertToURL(const char* urlStr);
@@ -78,7 +84,7 @@ int login(url* urlObj, int sockfd);
  *
  * This function reads the server's response from the socket and returns it as a null-terminated string.
  *
- * @param sockfd The socket file descriptor.
+ * @param sockfd The socket descriptor.
  * @return A pointer to the received reply as a null-terminated string. The caller is responsible for freeing the memory allocated for the string.
  */
 char * getReply(int sockfd);
